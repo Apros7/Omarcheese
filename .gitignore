@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+/dist/
+/omarchesse-dev
+/omarchesse-mac-*.json
+/omarchesse-omarchy-*.json

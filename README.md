@@ -1,57 +1,73 @@
 # Omarchesse
 
-Battery-saving work for [Omarchy](https://omarchy.org) on a Framework laptop, measured against a MacBook doing the same thing.
+<p align="center">
+  <img src="logo.png" alt="Omarchesse, a smiling cheese" width="220" />
+</p>
 
-The north-star metric is not "hours remaining" in the menu bar. It is:
+A boring cheese that infiltrates your battery and makes it a little harder to pull watts out, so the pack lasts longer.
+
+Battery-saving work for [Omarchy](https://omarchy.org) on a Framework, measured against a MacBook doing the same thing.
+
+North-star metric:
 
 ```
 gap_w = mean watts on Omarchy − mean watts on the MacBook
 ```
 
-for a named workload, both unplugged, brightness matched. The project is done when `gap_w` is 0.
+Same named workload, both unplugged, brightness matched. Done when `gap_w` is 0.
 
-Background on why watts, where they go, and what Omarchy's defaults cost: [docs/how-power-works.md](docs/how-power-works.md).
+Why watts, where they go, what Omarchy's defaults cost: [docs/how-power-works.md](docs/how-power-works.md).
 
-## First experiment
+## Use it
 
-Clone this repo on **both** laptops. Python 3.9+ from the system is enough. No packages to install.
+Binaries live in `dist/` after `./script/build`:
 
-On each machine, unplug, set brightness to 40%, then:
+| File | Machine |
+| --- | --- |
+| `dist/omarchesse-mac` | Apple silicon MacBook (and this Studio) |
+| `dist/omarchesse-omarchy` | Framework running Omarchy |
+| `dist/omarchesse-mac-intel` | Intel MacBook, if you have one |
 
-```bash
-python3 -m omarchesse protocol idle-desktop
-python3 -m omarchesse record idle-desktop
-```
+Copy the matching file onto each laptop. No Python, no install.
 
-Copy the two JSON files from `results/` onto one computer and:
-
-```bash
-python3 -m omarchesse compare results/darwin-idle-desktop-....json results/linux-idle-desktop-....json
-```
-
-That printout is the baseline. After that, the `coding` scenario is the one that matters for daily use.
-
-On the Framework only:
+On **each** laptop: unplug, brightness 40%, extra apps closed, then:
 
 ```bash
-python3 -m omarchesse snapshot    # watts right now, plus Hyprland/power-profile context
-python3 -m omarchesse audit       # read-only list of likely waste (does not change anything)
+chmod +x omarchesse-mac          # once; on Omarchy use omarchesse-omarchy
+./omarchesse-mac                 # 3 minutes of idle desktop
 ```
 
-`bin/omarchesse` is the same CLI if you prefer a script on `PATH`.
+It writes a JSON file next to the binary, named like `omarchesse-mac-idle-desktop-….json`. Copy both JSON files back to this machine (this folder is fine) and:
 
-## Rules for a fair comparison
+```bash
+./dist/omarchesse-mac compare
+```
 
-- Unplug. AC numbers are a different measurement.
-- Same scenario, same brightness, Wi-Fi on, keyboard backlight off.
-- Let the machine sit through the settle period. Don't poke it during `idle-desktop`.
-- Don't compare a MacBook on Low Power Mode to Omarchy on `performance`.
-- This Mac Studio (if you develop here) has no battery. It cannot be the Mac baseline.
+That picks the newest Mac + Omarchy files in the folder. Or pass them explicitly:
 
-## What happens after we have numbers
+```bash
+./dist/omarchesse-mac compare omarchesse-mac-….json omarchesse-omarchy-….json
+```
 
-1. Read the idle gap. If idle is already 8 W worse, fix the floor (profile, refresh rate, blur, wakeups) before chasing apps.
-2. Read `audit` on Omarchy. Apply one change at a time.
-3. Re-record the same scenario. Keep the JSON. The history is the project.
-4. Only then look at coding/browse/video. Those sit on top of the idle floor.
-# Omarcheese
+Daily-use scenario, after idle:
+
+```bash
+./omarchesse-mac coding
+```
+
+On the Framework only, `./omarchesse-omarchy audit` is a read-only checklist. It does not change anything.
+
+If macOS blocks the binary: right-click → Open, or `xattr -d com.apple.quarantine omarchesse-mac`.
+
+## Fair comparison
+
+- Unplug. This Studio has no battery and cannot be the Mac baseline.
+- Same brightness, Wi-Fi on, keyboard backlight off.
+- Don't compare Mac Low Power Mode to Omarchy `performance`.
+- Don't poke the machine during idle.
+
+## After you have numbers
+
+1. If idle is already several watts worse, fix the floor (profile, refresh rate, blur) before chasing apps.
+2. Change one thing on Omarchy, re-record, keep the JSON. The history is the project.
+3. Then record `coding`.

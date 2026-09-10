@@ -1,0 +1,11 @@
+#!/bin/sh
+set -euo pipefail
+cd "$(dirname "$0")/.."
+mkdir -p dist
+echo "building darwin/arm64 (MacBook / this Studio)"
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o dist/omarchesse-mac .
+echo "building darwin/amd64 (Intel MacBook, if you have one)"
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o dist/omarchesse-mac-intel .
+echo "building linux/amd64 (Omarchy / Framework)"
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o dist/omarchesse-omarchy .
+ls -lh dist
